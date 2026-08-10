@@ -1,0 +1,41 @@
+# ---------------------------------------------------------------------------
+# Palma Pool Club — single repository.
+#
+# The Next.js app lives in site/. On Vercel, set Root Directory = site.
+# site/.gitignore still applies inside that folder (node_modules, .next,
+# screenshots), so this file only covers the research material at the root.
+# ---------------------------------------------------------------------------
+
+# Abandoned Stitch mockups — 36 MB of AI-generated stock imagery and
+# Material-3 markup that this project explicitly does not use. Kept on disk
+# for reference, deliberately not versioned.
+/stitch_exported/
+
+# Base64 duplicates of files already in selected/
+/selected/b64/
+
+# OS noise
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# ---------------------------------------------------------------------------
+# DELIBERATELY VERSIONED, despite being large — do not add these to ignore:
+#   *.png, *.jpg at root   the ONLY copies of the venue's photography
+#   selected/              menu and price cards, source of truth for all
+#                          typed pricing and menu content
+#   instagram_raw/         35 scraped posts, source of every Serbian sentence
+#   refs/                  competitor reference screenshots
+# Losing any of these means losing content that cannot be reconstructed.
+# ---------------------------------------------------------------------------
+
+# ui-ux-pro-max skill installation — a TOOL, not project content.
+# Regenerate with:  npm i -g ui-ux-pro-max-cli && uipro init --ai claude
+# (run from the repo root; it writes .claude/skills/)
+# The generated design system IS versioned, at site/design-system/.
+/.claude/

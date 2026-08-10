@@ -1,0 +1,143 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------------
+   PALMA POOL CLUB — DESIGN TOKENS
+
+   Source of truth: design-system/palma-pool-club/MASTER.md (see "Brand
+   Overrides"). The day palette is sampled from the venue's own photographs;
+   the night palette is taken from their real DJ flyer artwork.
+
+   Two visual modes, switched by a `data-mode` attribute at page or section
+   level. NOT a user toggle, and deliberately NOT tied to prefers-color-scheme
+   — every page has one fixed look.
+--------------------------------------------------------------------------- */
+
+@theme {
+  /* -- Day palette: sampled from real photos (BUILD_PROMPT §2) ------------- */
+  --color-pool: #1ba5c4; /* pool water, midday drone shots */
+  --color-pool-deep: #0e6e86; /* deep end / shadowed water */
+  --color-sand: #ede4d6; /* limestone pool deck */
+  --color-cream: #faf6ef; /* page background */
+  --color-teak: #b07b4b; /* composite wood decking */
+  --color-brass: #c89b4a; /* brand gold from menus & flyers */
+  --color-ink: #241c16; /* body text */
+  --color-float-red: #d6362f; /* the mushroom float — punctuation accent ONLY */
+
+  /* -- Night palette: straight off the DJ flyers -------------------------- */
+  --color-night: #0b0906;
+  --color-gold: #c9a24b;
+  --color-gold-bright: #e8c877; /* use where --color-gold fails 4.5:1 */
+  --color-night-text: #f2ebdd;
+
+  /* -- Type ---------------------------------------------------------------- */
+  --font-display: var(--font-fraunces);
+  --font-sans: var(--font-source-sans);
+
+  /* -- Motion: every duration lands in the 150–300ms band (§2) ------------- */
+  --ease-out-soft: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* ---------------------------------------------------------------------------
+   MODE TOKENS
+   Semantic names so components never reach for a raw palette colour.
+--------------------------------------------------------------------------- */
+
+[data-mode="day"] {
+  --bg: var(--color-cream);
+  --surface: var(--color-sand);
+  --surface-raised: #ffffff;
+  --text: var(--color-ink);
+  --text-muted: #6b5c4f;
+  --accent: var(--color-brass);
+  --on-accent: var(--color-ink);
+  --primary: var(--color-pool-deep);
+  --on-primary: var(--color-cream);
+  --border: #ddd0bd;
+  --ring: var(--color-pool-deep);
+}
+
+[data-mode="night"] {
+  --bg: var(--color-night);
+  --surface: #141009;
+  --surface-raised: #1c1710;
+  --text: var(--color-night-text);
+  --text-muted: #b3a892;
+  --accent: var(--color-gold-bright);
+  --on-accent: var(--color-night);
+  --primary: var(--color-gold-bright);
+  --on-primary: var(--color-night);
+  --border: #3a301f;
+  --ring: var(--color-gold-bright);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-text: var(--text);
+  --color-text-muted: var(--text-muted);
+  --color-accent: var(--accent);
+  --color-on-accent: var(--on-accent);
+  --color-primary: var(--primary);
+  --color-on-primary: var(--on-primary);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+}
+
+/* ---------------------------------------------------------------------------
+   BASE
+--------------------------------------------------------------------------- */
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Prices and times, set so columns align.
+
+   MEASURED (scripts/check-digits.mjs, run against the actual woff2):
+   Source Sans 3 digits are ALREADY TABULAR — all ten glyphs advance 472/1000em.
+   The font ships `pnum` (opt in to proportional) but no `tnum`, so
+   `tabular-nums` below is a no-op today. It is kept deliberately: it states
+   the intent and would take effect if the sans is ever swapped for a font
+   whose default figures are proportional.
+
+   Fraunces digits are PROPORTIONAL (9 distinct widths). Never set a price or
+   a numeric column in the display face — always the sans. */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Uppercase tracked label — the section eyebrow style from §2. */
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* ---------------------------------------------------------------------------
+   REDUCED MOTION
+   Global backstop. Individual motion components ALSO check the media query in
+   JS so they never even start an animation — this is belt and braces.
+--------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Visible focus on everything interactive, in both modes. */
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 3px;
+  border-radius: 2px;
+}

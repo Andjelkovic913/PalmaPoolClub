@@ -1,0 +1,36 @@
+/**
+ * Instagram glyph.
+ *
+ * Lucide removed all brand icons (trademark), so this one is drawn by hand —
+ * deliberately on Lucide's own grid (24×24 viewBox, 2px stroke, round caps,
+ * `currentColor`) so it sits with the rest of the icon set rather than looking
+ * imported. BUILD_PROMPT.md §0 rule 4 wants SVG icons, never emoji; that still
+ * holds, this is just not one Lucide can supply.
+ */
+export function InstagramIcon({
+  size = 24,
+  className = "",
+}: {
+  size?: number;
+  className?: string;
+}) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+      focusable="false"
+    >
+      <rect width="20" height="20" x="2" y="2" rx="5" />
+      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37Z" />
+      <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+    </svg>
+  );
+}
