@@ -5,6 +5,10 @@
 Read `../CLAUDE.md` first for the rules, then this for where things stand.
 Phases follow `../BUILD_PROMPT.md` §9.
 
+**Git:** one repository, rooted at the parent (`PalmaPoolClub/`), not here.
+Commit from there, not from `site/`. Vercel Root Directory = `site`.
+Last commit: `56ffd75` — phases 0–3, 166 files.
+
 ---
 
 ## Status

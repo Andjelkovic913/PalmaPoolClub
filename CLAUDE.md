@@ -32,9 +32,20 @@ online presence is Instagram (@palmapoolclub, 3,490 followers).
 
 ## Where everything is
 
+**One git repository, rooted here** — not in `site/`. The research material is
+versioned alongside the app because it cannot be reconstructed if lost: these
+are the venue's only copies of its photography, the scraped captions that are
+the source of every Serbian sentence on the site, and the price and menu cards
+that all typed pricing derives from.
+
+On Vercel, set **Root Directory = `site`**.
+
+Not versioned: `stitch_exported/` (abandoned mockups) and `.claude/` (a tool
+install — regenerate with `npm i -g ui-ux-pro-max-cli && uipro init --ai claude`).
+
 | Path | What |
 |---|---|
-| `site/` | **The Next.js app.** All build work happens here. Vercel root = `site/`. |
+| `site/` | **The Next.js app.** All build work happens here. |
 | `site/PROGRESS.md` | **Phase-by-phase status. Read this second.** |
 | `site/OPEN_QUESTIONS.md` | Every unresolved question + every decision already made. Check before asking the owner anything. |
 | `site/design-system/palma-pool-club/MASTER.md` | Design system. The `## Brand Overrides` section at the bottom is the real source of truth. |
