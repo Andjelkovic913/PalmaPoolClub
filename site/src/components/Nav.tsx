@@ -17,6 +17,10 @@ import { bookingCta, navLinks } from "@/content/nav";
  */
 export function Nav() {
   const [open, setOpen] = useState(false);
+  /* Set the first time the button is pressed, and never unset. The closing
+     animation is gated on it — otherwise it would play on first paint and the
+     burger would assemble itself in front of someone who never touched it. */
+  const [touched, setTouched] = useState(false);
   const pathname = usePathname();
 
   // Close the drawer on navigation.
@@ -84,7 +88,10 @@ export function Nav() {
 
           <button
             type="button"
-            onClick={() => setOpen((v) => !v)}
+            onClick={() => {
+              setTouched(true);
+              setOpen((v) => !v);
+            }}
             aria-expanded={open}
             aria-controls="mobile-drawer"
             aria-label={open ? "Zatvori meni" : "Otvori meni"}
@@ -94,7 +101,12 @@ export function Nav() {
                 the bars converge and rotate into the cross. See `.burger` in
                 globals.css. The button keeps its aria-label, so what a screen
                 reader announces does not depend on the drawing. */}
-            <span className="burger" data-open={open} aria-hidden>
+            <span
+              className="burger"
+              data-open={open}
+              data-touched={touched}
+              aria-hidden
+            >
               <span />
               <span />
               <span />

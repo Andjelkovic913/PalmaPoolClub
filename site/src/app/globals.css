@@ -198,39 +198,110 @@ body {
 
 .burger span {
   position: absolute;
+  top: 0;
   left: 0;
   display: block;
   width: 100%;
   height: 2px;
-  border-radius: 2px;
+  border-radius: 999px;
   background: currentColor;
-  transition:
-    transform 250ms var(--ease-out-soft),
-    top 250ms var(--ease-out-soft);
+  /* Position comes from `translateY`, not `top`, so a single transform drives
+     the whole motion and the keyframes below have one property to interpolate. */
+  transform: translateY(var(--y)) translateX(0) rotate(0deg) scaleX(1);
 }
 
 .burger span:nth-child(1) {
-  top: 0;
+  --y: 0px;
 }
 .burger span:nth-child(2) {
-  top: 7px;
+  --y: 7px;
 }
 .burger span:nth-child(3) {
-  top: 14px;
+  --y: 14px;
 }
 
-.burger[data-open="true"] span:nth-child(1),
-.burger[data-open="true"] span:nth-child(3) {
-  top: 7px;
+/* The three phases, read off the reference frame by frame:
+     0–35%   the bars shorten to dots AND drift apart horizontally, so their
+             centres come to sit on a diagonal
+     35–60%  the dots rotate into the diagonal
+     60–100% they grow back out along it, into the two strokes of the cross
+   The middle bar simply collapses and stays collapsed — in the finished ✕ it
+   would sit exactly where the strokes cross, so it is never missed. */
+
+@keyframes burger-top {
+  0% {
+    transform: translateY(0px) translateX(0) rotate(0deg) scaleX(1);
+  }
+  /* Vertical convergence LAGS the horizontal drift on purpose: at this point
+     the top dot is still high and already right, the bottom one still low and
+     already left, so the three sit on a diagonal — the shape the reference
+     holds before it rotates. Bringing them to the same y here instead would
+     line them up horizontally and the diagonal beat would be lost. */
+  35% {
+    transform: translateY(2px) translateX(7px) rotate(0deg) scaleX(0.2);
+  }
+  60% {
+    transform: translateY(7px) translateX(0) rotate(45deg) scaleX(0.2);
+  }
+  100% {
+    transform: translateY(7px) translateX(0) rotate(45deg) scaleX(1);
+  }
 }
+
+@keyframes burger-middle {
+  0% {
+    transform: translateY(7px) scaleX(1);
+  }
+  /* Stays as the centre dot through the diagonal and the rotation, then goes.
+     By the time it vanishes the two strokes have grown over that exact point,
+     so nothing appears to disappear. */
+  35%,
+  60% {
+    transform: translateY(7px) scaleX(0.2);
+  }
+  100% {
+    transform: translateY(7px) scaleX(0);
+  }
+}
+
+@keyframes burger-bottom {
+  0% {
+    transform: translateY(14px) translateX(0) rotate(0deg) scaleX(1);
+  }
+  35% {
+    transform: translateY(12px) translateX(-7px) rotate(0deg) scaleX(0.2);
+  }
+  60% {
+    transform: translateY(7px) translateX(0) rotate(-45deg) scaleX(0.2);
+  }
+  100% {
+    transform: translateY(7px) translateX(0) rotate(-45deg) scaleX(1);
+  }
+}
+
 .burger[data-open="true"] span:nth-child(1) {
-  transform: rotate(45deg);
-}
-.burger[data-open="true"] span:nth-child(3) {
-  transform: rotate(-45deg);
+  animation: burger-top 300ms var(--ease-out-soft) forwards;
 }
 .burger[data-open="true"] span:nth-child(2) {
-  transform: scaleX(0);
+  animation: burger-middle 300ms var(--ease-out-soft) forwards;
+}
+.burger[data-open="true"] span:nth-child(3) {
+  animation: burger-bottom 300ms var(--ease-out-soft) forwards;
+}
+
+/* Closing replays the same keyframes backwards, so the ✕ unfolds the way it
+   folded. Gated on `data-touched`, which is only set once the button has
+   actually been pressed — without it the close animation would fire on first
+   paint and the burger would assemble itself in front of a visitor who never
+   touched anything. */
+.burger[data-touched="true"][data-open="false"] span:nth-child(1) {
+  animation: burger-top 300ms var(--ease-out-soft) reverse forwards;
+}
+.burger[data-touched="true"][data-open="false"] span:nth-child(2) {
+  animation: burger-middle 300ms var(--ease-out-soft) reverse forwards;
+}
+.burger[data-touched="true"][data-open="false"] span:nth-child(3) {
+  animation: burger-bottom 300ms var(--ease-out-soft) reverse forwards;
 }
 
 @keyframes drawer-slide-in {
