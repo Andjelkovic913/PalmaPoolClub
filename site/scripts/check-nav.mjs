@@ -104,13 +104,18 @@ for (const [w, h, label] of SIZES) {
     true
   );
 
-  // Esc must close it: a drawer with no way out traps a visitor.
+  /* Esc must close it: a drawer with no way out traps a visitor.
+     Waits for the panel to actually leave rather than sleeping a fixed
+     interval — the exit is animated, so a hardcoded wait silently becomes a
+     failing test the moment the duration changes. */
   await page.keyboard.press("Escape");
-  await page.waitForTimeout(300);
-  check(
-    `${label} — Esc zatvara`,
-    (await page.locator("#mobile-drawer").count()) === 0
-  );
+  let escClosed = true;
+  try {
+    await page.locator("#mobile-drawer").waitFor({ state: "detached", timeout: 2000 });
+  } catch {
+    escClosed = false;
+  }
+  check(`${label} — Esc zatvara`, escClosed, "panel je i dalje u DOM-u posle 2s");
 
   /* The burger morph must run on EVERY press, not just the first.
      Opening and closing share one set of keyframes with the direction

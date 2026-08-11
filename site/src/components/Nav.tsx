@@ -16,7 +16,7 @@ import { bookingCta, navLinks } from "@/content/nav";
  * that must never be a tap away (BUILD_PROMPT.md §9 Phase 2).
  */
 /** Must match the drawer animation duration in globals.css. */
-const DRAWER_MS = 250;
+const DRAWER_MS = 400;
 
 export function Nav() {
   /* `open` means "in the DOM". `closing` means "in the DOM but on its way

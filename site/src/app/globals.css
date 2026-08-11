@@ -165,9 +165,15 @@ body {
    Slides in from the right, where the burger is — a panel that appears on the
    opposite side of the control that opened it reads as a different element.
 
-   250ms sits inside the 150–300ms band MASTER.md §5 sets, and the reduced-
-   motion block below zeroes `animation-duration` globally, so this needs no
-   guard of its own.
+   400ms, matched to the burger's 450ms so the icon and the panel read as one
+   gesture rather than two. Outside the 150–300ms band — written up as a
+   documented exception in MASTER.md §5 alongside the burger, not a silent
+   drift. The reduced-motion block below zeroes `animation-duration` globally,
+   so it still collapses to an instant open there.
+
+   ⚠️ `DRAWER_MS` in Nav.tsx MUST match this number. It is the fallback that
+   unmounts the panel when `animationend` never fires; set it shorter than the
+   animation and the drawer is cut off mid-slide.
 
    The scrim fades its COLOUR, never the element's `opacity`: scripts/shoot.mjs
    counts anything below opacity 0.99 as a possibly-unfired <Reveal>, and a
@@ -353,12 +359,12 @@ body {
 }
 
 .drawer-panel {
-  animation: drawer-slide-in 250ms var(--ease-out-soft) both;
+  animation: drawer-slide-in 400ms var(--ease-out-soft) both;
 }
 
 .drawer-scrim {
   background-color: color-mix(in srgb, var(--color-ink) 55%, transparent);
-  animation: scrim-fade-in 250ms var(--ease-out-soft) both;
+  animation: scrim-fade-in 400ms var(--ease-out-soft) both;
 }
 
 /* Closing. The panel stays mounted until the animation ends — see the
@@ -366,12 +372,12 @@ body {
    happen at all. `pointer-events: none` so a tap during the slide-out cannot
    hit a link that is on its way off screen. */
 .drawer-panel[data-closing="true"] {
-  animation: drawer-slide-out 250ms var(--ease-out-soft) both;
+  animation: drawer-slide-out 400ms var(--ease-out-soft) both;
   pointer-events: none;
 }
 
 .drawer-scrim[data-closing="true"] {
-  animation: scrim-fade-out 250ms var(--ease-out-soft) both;
+  animation: scrim-fade-out 400ms var(--ease-out-soft) both;
   pointer-events: none;
 }
 
