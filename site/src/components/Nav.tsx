@@ -36,7 +36,8 @@ export function Nav() {
   }, [open]);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-bg/90 backdrop-blur-sm">
+    <>
+      <header className="sticky top-0 z-50 border-b border-border bg-bg/90 backdrop-blur-sm">
       <div className="mx-auto flex w-full max-w-[1280px] items-center justify-between gap-4 px-5 py-3 md:px-10">
         <Link
           href="/"
@@ -92,10 +93,28 @@ export function Nav() {
         </div>
       </div>
 
+      </header>
+
+      {/**
+       * RENDERED OUTSIDE <header> ON PURPOSE. Do not move it back in.
+       *
+       * The header carries `backdrop-blur-sm`, and `backdrop-filter` makes an
+       * element a containing block for its `position: fixed` descendants. A
+       * drawer nested inside it was therefore positioned against the 61px-tall
+       * header instead of the viewport, so `top-[61px] bottom-0` resolved to
+       * ZERO height — the links spilled out of a collapsed, scroll-clipped box
+       * and the page painted straight over them. On a phone the menu looked
+       * like it opened to nothing.
+       *
+       * Out here it is positioned against the viewport, which is what
+       * `fixed inset-0` was always meant to do. `z-40` keeps it below the
+       * sticky header (`z-50`) so the bar with the ✕ stays on top of it, and
+       * `pt-24` clears that bar so the first link is never hidden behind it.
+       */}
       {open && (
         <div
           id="mobile-drawer"
-          className="fixed inset-x-0 top-[61px] bottom-0 z-40 overflow-y-auto bg-bg px-5 py-8 lg:hidden"
+          className="fixed inset-0 z-40 overflow-y-auto bg-bg px-5 pt-24 pb-10 lg:hidden"
         >
           <nav aria-label="Glavna navigacija (mobilna)">
             <ul className="flex flex-col gap-1">
@@ -122,6 +141,6 @@ export function Nav() {
           </nav>
         </div>
       )}
-    </header>
+    </>
   );
 }

@@ -1,0 +1,111 @@
+/**
+ * Proves the mobile drawer actually shows its links.
+ *
+ * It once did not, and the failure was invisible in code review: the header
+ * carries `backdrop-blur-sm`, and `backdrop-filter` makes an element a
+ * containing block for `position: fixed` DESCENDANTS. A drawer nested inside
+ * the header was therefore positioned against the 61px header instead of the
+ * viewport, so `top-[61px] bottom-0` resolved to zero height. The markup was
+ * correct, the classes were correct, and the menu opened to nothing.
+ *
+ * So this does not check classes. It opens the drawer in a real phone-sized
+ * browser and, for every link, asks the browser **what element is actually at
+ * that point** — `elementFromPoint`. A link that is present, sized and on
+ * screen but painted over by the page fails here, which is exactly what
+ * happened before.
+ *
+ * Usage: node scripts/check-nav.mjs      (needs the dev server)
+ */
+import { chromium } from "playwright";
+
+const BASE = process.env.BASE ?? "http://localhost:3000";
+const SIZES = [
+  [360, 640, "mali Android"],
+  [375, 667, "iPhone SE"],
+  [390, 844, "iPhone 14"],
+  [430, 932, "iPhone Pro Max"],
+];
+
+const results = [];
+const check = (name, pass, detail = "") => results.push({ name, pass, detail });
+
+const browser = await chromium.launch();
+
+for (const [w, h, label] of SIZES) {
+  const ctx = await browser.newContext({
+    viewport: { width: w, height: h },
+    deviceScaleFactor: 2,
+  });
+  const page = await ctx.newPage();
+  await page.goto(BASE + "/", { waitUntil: "networkidle" });
+
+  const opener = page.locator('button[aria-label="Otvori meni"]');
+  check(`${label} — burger je vidljiv`, await opener.isVisible());
+
+  await opener.click();
+  await page.waitForTimeout(400);
+
+  const m = await page.evaluate(() => {
+    const d = document.getElementById("mobile-drawer");
+    if (!d) return null;
+    const box = d.getBoundingClientRect();
+    const links = [...d.querySelectorAll("a")];
+
+    const reachable = links.filter((a) => {
+      const r = a.getBoundingClientRect();
+      if (r.width === 0 || r.height === 0) return false;
+      if (r.top < 0 || r.bottom > window.innerHeight) return false;
+      // The real question: is the link the thing the finger would hit?
+      const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+      return Boolean(hit && hit.closest("#mobile-drawer"));
+    });
+
+    return {
+      drawerHeight: Math.round(box.height),
+      viewportHeight: window.innerHeight,
+      total: links.length,
+      reachable: reachable.length,
+      // The bug's signature: a drawer far shorter than the screen.
+      collapsed: box.height < window.innerHeight * 0.5,
+    };
+  });
+
+  if (!m) {
+    check(`${label} — drawer se otvara`, false, "#mobile-drawer nije u DOM-u");
+    await ctx.close();
+    continue;
+  }
+
+  check(`${label} — drawer se otvara`, true);
+  check(
+    `${label} — drawer pokriva ekran`,
+    !m.collapsed,
+    `visina ${m.drawerHeight}px na ekranu od ${m.viewportHeight}px`
+  );
+  check(
+    `${label} — svih ${m.total} linkova je dohvatljivo prstom`,
+    m.reachable === m.total,
+    `${m.reachable}/${m.total} — ostali su van ekrana ili prekriveni`
+  );
+
+  // Esc must close it: a drawer with no way out traps a visitor.
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(300);
+  check(
+    `${label} — Esc zatvara`,
+    (await page.locator("#mobile-drawer").count()) === 0
+  );
+
+  await ctx.close();
+}
+
+await browser.close();
+
+console.log("\n=== MOBILNA NAVIGACIJA ===");
+let failed = 0;
+for (const r of results) {
+  if (!r.pass) failed++;
+  console.log(`${r.pass ? "PASS" : "FAIL"}  ${r.name}${r.pass ? "" : "  — " + r.detail}`);
+}
+console.log(`\n${results.length - failed}/${results.length} passed`);
+process.exit(failed ? 1 : 0);
