@@ -4,7 +4,7 @@ import { PalmMark } from "../Logo";
 import { Photo } from "../Photo";
 import { Reveal } from "../Reveal";
 import { Eyebrow, Section } from "../Section";
-import { flyerVoice } from "@/content/copy";
+import { flyerVoice, matinePage } from "@/content/copy";
 import { emptyStateCopy, upcomingEvents } from "@/content/events";
 import { business } from "@/content/business";
 
@@ -24,9 +24,9 @@ export function MatineTeaser() {
         <div className="grid items-center gap-10 md:grid-cols-[1.3fr_1fr]">
           <div>
             <PalmMark className="w-12 text-accent" />
-            <Eyebrow>Matine</Eyebrow>
+            <Eyebrow>{matinePage.title}</Eyebrow>
             <h2 className="mt-1 font-display text-4xl leading-none tracking-tight md:text-6xl">
-              DJ žurke pored bazena
+              {matinePage.subhead}
             </h2>
             <p className="mt-5 max-w-md text-lg text-text-muted">
               {flyerVoice.vibe} {flyerVoice.weekend}

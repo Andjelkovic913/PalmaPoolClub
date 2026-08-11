@@ -64,6 +64,14 @@ install — regenerate with `npm i -g ui-ux-pro-max-cli && uipro init --ai claud
    prose must trace to `src/content/copy.ts` (scraped captions), a menu/price/
    flyer card, or a visible `<Todo>` logged in `OPEN_QUESTIONS.md`. A
    plausible-sounding guess is the worst possible outcome here.
+
+   **One authorised exception: three `/faq` answers are DRAFTED**, on the
+   owner's explicit instruction, rather than shown as `<Todo>`. Do not revert
+   them and do not extend the exception anywhere else. They carry
+   `verified: false` in `src/content/faq.ts`, `scripts/check-faq.mjs` reports
+   them, and `OPEN_QUESTIONS.md` #2 tracks them. Even inside that exception a
+   drafted answer must never state a commercial term — no refund, deadline or
+   cancellation window. The check script fails the build on such wording.
 2. **Never use stock or AI imagery.** All photography is the venue's own,
    routed through `src/content/images.ts`. A slot with no photo renders
    `<ImageSlot>` — a visible warm-sand block. Never a gradient, never Unsplash.
@@ -92,6 +100,25 @@ node scripts/shoot.mjs / /menu   # screenshots at 375/768/1024/1440,
                                  # + overflow detection + reduced-motion check
 node scripts/shoot-sections.mjs / 1440   # per-section shots, legible
 node scripts/zoom.mjs / "h1" out.png     # 4x detail crop
+node scripts/check-lightbox.mjs  # /gallery viewer: focus trap, Esc, arrows,
+                                 # wrap, scroll lock, focus restore — 16 checks
+node scripts/check-faq.mjs       # which FAQ answers are sourced vs DRAFTED;
+                                 # fails if a draft states a commercial term
+node scripts/check-menu.mjs      # both menu cards present in the RAW HTML +
+                                 # ARIA tab keyboard pattern — 24 checks
+node scripts/check-price.mjs     # /book prices, through the real form
+node scripts/check-image-scale.mjs  # no photo rendered beyond maxRenderWidth,
+                                 # measured at 375/768/1440 incl. phone DPR
+
+node scripts/check-db.mjs        # diagnoses .env.local, the connection, the
+                                 # tables and RLS — run BEFORE drizzle-kit
+node scripts/check-admin.mjs     # /admin stays locked and every action gates
+
+# These three need NO server and NO credentials:
+node scripts/check-availability.mjs  # capacity + next-free-date — 24 checks
+node scripts/check-validate.mjs      # server-side input rules — 37 checks
+node scripts/check-emails.mjs        # not an open relay, no commercial terms
+node scripts/seed-bookings.mjs       # test days in the DB (needs DATABASE_URL)
 node scripts/check-map.mjs       # confirms the map pins the venue
 node scripts/check-fonts.mjs     # diacritics + OpenType features (needs a build)
 node scripts/check-digits.mjs    # proves digit widths are tabular
@@ -111,6 +138,18 @@ report a page as done without having seen it.
   `src/components/icons/InstagramIcon.tsx`.
 - **`python3` and `python` on this machine hit the Microsoft Store stub and
   fail.** Use `py -3`.
+- **Run the verification scripts from PowerShell, not Git Bash.** Git Bash
+  converts a leading-slash argument to a Windows path, so
+  `node scripts/shoot.mjs /events` navigates to
+  `http://localhost:3000C:/Program Files/Git/events` and throws.
+- **`shoot.mjs` wipes `screenshots/` on every run.** Pass every route you want
+  to compare in one invocation, not one call per page.
+- **Night mode reaches Nav and Footer through CSS, not JS.** Only the root
+  layout renders `<html>`, so a page sets `data-mode="night"` on its own
+  `<main>` and `:root:has(main[data-mode="night"]) body` in `globals.css`
+  redefines the tokens one level up, from where they inherit into the chrome.
+  The selector requires `main` on purpose — that is what stops a night
+  *section* (the home page's Matine teaser) from dragging the whole site dark.
 - **Embed maps by lat/lng, never by the address string.** "Kralja Petra Prvog
   BB" is *bez broja* and geocodes to a road midpoint with no pin, showing a
   neighbouring hotel instead. Coordinates are in `business.geo`.
@@ -120,7 +159,41 @@ report a page as done without having seen it.
   portrait to 1.80 landscape. Forcing a portrait into a wide cell produces a
   meaningless letterboxed slice. Every image carries a `focal` object-position.
 - **The four `511×290` images are video frame grabs.** Never render them wider
-  than ~511px — check `maxRenderWidth` in the manifest.
+  than ~511px — check `maxRenderWidth` in the manifest. **`node
+  scripts/check-image-scale.mjs` now enforces this**, because the warning alone
+  did not: `/pricing` shipped one at `100vw`, which on a phone meant 670 device
+  pixels from a 511px source. The `sizes` attribute is where this hides — CSS
+  reading `100vw` does not look like an upscale in review.
+- **Dim things with colour, never `opacity`.** `shoot.mjs` counts any element
+  below opacity 0.99 as a possibly-unfired `<Reveal>`, so a decorative fade
+  parks itself in that check permanently as false noise.
+- **`/menu`'s tabs hide a panel, they never unmount it.** Both cards must stay
+  in the server-rendered HTML — conditionally rendering one would take the
+  drinks card out of the source and out of the index, which is exactly the
+  problem this project exists to fix. `scripts/check-menu.mjs` guards it.
+- **`bg-surface` is the Footer's colour.** A page section that ends on
+  `bg-surface` runs into the footer with no visible edge. This already had to
+  be undone once on `/menu`.
+- **Telephone bookings must be entered on `/admin`.** The venue takes them by
+  phone and the database cannot see them; until they are recorded, the capacity
+  figure is half the truth and the site will accept guests for a full day. The
+  transaction lock only orders concurrent *online* requests.
+- **Every `/admin` server action calls `requireAdmin()` as its first line.** A
+  server action is a public HTTP endpoint — the login screen hides the button,
+  not the endpoint. `scripts/check-admin.mjs` fails the build otherwise.
+- **`/book` writes to a real database. Read `site/SETUP.md` before touching
+  it.** Four things there are load-bearing and easy to undo by accident:
+  `DATABASE_URL` must be Supabase's **session** pooler (5432 — the transaction
+  pooler drops the `FOR UPDATE` lock mid-transaction); pending bookings hold a
+  sunbed; the owner's decision link opens a page and decides on POST (mail
+  scanners prefetch links); and the migration enables RLS **with no policies**,
+  which is what keeps the public anon key from reading every guest's phone and
+  email.
+- **`lib/price.ts`, `lib/availability.ts` and `lib/validate.ts` have no
+  imports, on purpose.** There is no Postgres on this machine, so the three
+  modules where a mistake costs money are pure and their check scripts load
+  them directly (Node strips the types). Adding an import breaks the test —
+  pass config in as an argument instead.
 
 ---
 

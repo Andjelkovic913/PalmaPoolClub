@@ -23,7 +23,10 @@ export function ImageSlot({
 
   return (
     <div
-      className={`flex flex-col items-center justify-center gap-1 border-2 border-dashed border-teak/50 bg-sand p-4 text-center ${fill ? "absolute inset-0" : ""} ${className}`}
+      /* `image-slot` is a styling hook, not a utility: globals.css uses it to
+         keep this block legible on a night page without softening the signal.
+         Do not remove it when editing the utilities around it. */
+      className={`image-slot flex flex-col items-center justify-center gap-1 border-2 border-dashed border-teak/50 bg-sand p-4 text-center ${fill ? "absolute inset-0" : ""} ${className}`}
       style={fill ? undefined : { aspectRatio: ratio }}
       role="img"
       aria-label={entry.alt}

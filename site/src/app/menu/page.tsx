@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Info } from "lucide-react";
+import { MenuTabs } from "@/components/menu/MenuTabs";
 import { MenuLegend, MenuMarker } from "@/components/MenuMarker";
 import { Photo } from "@/components/Photo";
 import { Eyebrow, Section, SectionHeading } from "@/components/Section";
@@ -98,34 +99,42 @@ export default function MenuPage() {
         </div>
       </Section>
 
-      {/* HRANA */}
+      {/* One section holds both panels.
+          This is also what fixes the colour clash: the drinks card used to sit
+          on `bg-surface`, the same sand as the Footer, so the bottom of the
+          menu ran straight into the footer with no edge. Both panels now share
+          the food card's cream ground, and the footer keeps its own colour and
+          reads as a separate band again. */}
       <Section>
-        <div className="flex flex-wrap items-baseline justify-between gap-4">
-          <SectionHeading>Hrana</SectionHeading>
-          <MenuLegend markers={foodLegend} />
-        </div>
-        <div className="mt-8 grid gap-x-14 gap-y-10 md:grid-cols-2">
-          {food.map((s) => (
-            <MenuBlock key={s.title} section={s} />
-          ))}
-        </div>
-      </Section>
-
-      {/* PIĆE — note this card carries a DIFFERENT legend from the food card. */}
-      <Section className="border-t border-border bg-surface">
-        <div className="flex flex-wrap items-baseline justify-between gap-4">
-          <SectionHeading>Piće</SectionHeading>
-          <MenuLegend markers={drinksLegend} />
-        </div>
-        <div className="mt-8 grid gap-x-14 gap-y-10 md:grid-cols-2">
-          {drinks.map((s) => (
-            <MenuBlock key={s.title} section={s} />
-          ))}
-        </div>
-
-        <p className="mt-10 font-display text-xl text-accent">
-          {menuNotes.hydration}
-        </p>
+        <MenuTabs
+          panels={{
+            hrana: (
+              <>
+                <MenuLegend markers={foodLegend} />
+                <div className="mt-8 grid gap-x-14 gap-y-10 md:grid-cols-2">
+                  {food.map((s) => (
+                    <MenuBlock key={s.title} section={s} />
+                  ))}
+                </div>
+              </>
+            ),
+            /* The drinks card carries a DIFFERENT legend from the food card —
+               ★ / ❄ / cocktail against ★ / 🌶 / 👥. See OPEN_QUESTIONS.md. */
+            pice: (
+              <>
+                <MenuLegend markers={drinksLegend} />
+                <div className="mt-8 grid gap-x-14 gap-y-10 md:grid-cols-2">
+                  {drinks.map((s) => (
+                    <MenuBlock key={s.title} section={s} />
+                  ))}
+                </div>
+                <p className="mt-10 font-display text-xl text-accent">
+                  {menuNotes.hydration}
+                </p>
+              </>
+            ),
+          }}
+        />
       </Section>
     </main>
   );

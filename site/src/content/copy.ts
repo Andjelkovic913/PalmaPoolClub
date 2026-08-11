@@ -126,6 +126,26 @@ export const matineAnnouncements = {
 } as const;
 
 /**
+ * /events page furniture.
+ *
+ * NOT scraped — these two lines are authored, and `BUILD_PROMPT.md` §9 Phase 4
+ * is their source ("Hero: … **MATINE** in large display, subhead *'DJ žurke
+ * pored bazena.'*"). They live here rather than inline in a component because
+ * the rule is that no Serbian prose is typed into JSX, whatever its source.
+ *
+ * Note the deliberate limit: the spec supplies a subhead, not a description of
+ * what Matine IS. No caption, flyer or card ever describes the event, so the
+ * "Šta je Matine?" section is built from verbatim announcement FACTS only —
+ * see `matineAnnouncements` above and OPEN_QUESTIONS.md rule 1.
+ */
+export const matinePage = {
+  /** Source: BUILD_PROMPT.md §9 Phase 4. Also used by the home teaser. */
+  subhead: "DJ žurke pored bazena",
+  /** The wordmark as the flyers set it. Source: both flyers. */
+  title: "Matine",
+} as const;
+
+/**
  * Nightlife voice — lifted from the DJ Byedov flyer artwork.
  * Source: brand_dj_byedov_poster_clean.jpg / dj.png
  * Used only on /events, in nightlife mode.

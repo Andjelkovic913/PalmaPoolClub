@@ -148,9 +148,17 @@ export default function PricingPage() {
           </div>
 
           <aside className="lg:sticky lg:top-24">
+            {/* Was `pool-panorama-loungers` — a 511×291 video frame grab with a
+                `maxRenderWidth` of 511, stretched to 100vw on mobile. At 4×
+                zoom the compression artefacts and mushy edges were obvious.
+
+                `deck-loungers-valley` is 1122×1402: 2.2× the pixel width, the
+                strongest ground-level shot in the set, and thematically the
+                right one for this page — it IS a row of sunbeds, which is what
+                the page sells. */}
             <div className="overflow-hidden rounded-sm">
               <Photo
-                id="pool-panorama-loungers"
+                id="deck-loungers-valley"
                 sizes="(max-width: 1024px) 100vw, 400px"
                 className="h-auto w-full"
               />

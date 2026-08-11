@@ -190,11 +190,16 @@ export const images = {
      The venue has never published night, dusk, DJ-booth or crowd photography.
      See OPEN_QUESTIONS.md #10. --------------------------------------------- */
 
+  /* These two sit in the /events photo strip beside `flyer-byedov` (0.75) and
+     `flyer-matine` (0.80). The dimensions on a null slot are pure placeholder
+     geometry — they only set the aspect of the block — so they are matched to
+     the flyers, otherwise the strip renders two tall posters next to two
+     stubby 3:2 boxes. Replace with the real dimensions when a photo arrives. */
   "event-dj-booth": {
     src: null,
     focal: "50% 50%",
-    width: 1200,
-    height: 800,
+    width: 1100,
+    height: 1400,
     alt: "DJ pult tokom Matine žurke pored bazena",
     maxRenderWidth: null,
     note: "NO PHOTO EXISTS. Needs a real shot from a Matine night.",
@@ -203,8 +208,8 @@ export const images = {
   "event-crowd-dusk": {
     src: null,
     focal: "50% 50%",
-    width: 1200,
-    height: 800,
+    width: 1100,
+    height: 1400,
     alt: "Gosti pored bazena u sumrak tokom Matine žurke",
     maxRenderWidth: null,
     note: "NO PHOTO EXISTS. Needs a real shot from a Matine night.",

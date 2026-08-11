@@ -56,7 +56,17 @@
   --ring: var(--color-pool-deep);
 }
 
-[data-mode="night"] {
+/* The second selector makes the site chrome follow a night PAGE.
+   Nav and Footer live in the root layout, which is the only place <html> is
+   rendered (Next 16) — a route segment cannot reach up and flip it. So the
+   page declares night on its own <main>, and this redefines the tokens one
+   level up on <body>, from where they inherit into <header>, <main> and
+   <footer> in one go. Pure CSS: no client component, no hydration flash, and
+   nothing to keep in sync with the route table.
+   Nav (`bg-bg/90`) and Footer (`bg-surface`) already use only semantic
+   tokens, so neither component needs a night variant. */
+[data-mode="night"],
+:root:has(main[data-mode="night"]) body {
   --bg: var(--color-night);
   --surface: #141009;
   --surface-raised: #1c1710;
@@ -116,6 +126,37 @@ body {
   letter-spacing: 0.18em;
   font-size: 0.75rem;
   font-weight: 600;
+}
+
+/* ---------------------------------------------------------------------------
+   PLACEHOLDERS IN NIGHT MODE
+
+   <ImageSlot> and <Todo> are deliberately loud — they must never be mistaken
+   for design and must never quietly reach production. Their day styling is
+   built from the day palette directly (warm sand, ink, float-red), which on
+   #0B0906 either glares or, in Todo's case, goes unreadable: `ink/70` is a
+   dark brown on near-black, and float-red itself is only ~3.8:1 there.
+
+   These two rules restore legibility WITHOUT softening the signal. Day
+   rendering is untouched.
+--------------------------------------------------------------------------- */
+
+[data-mode="night"] .image-slot {
+  background: var(--surface);
+  border-color: var(--color-gold);
+}
+
+/* The label and the slot ID carry their own day utilities (`text-teak`,
+   `text-ink/60`), so inheriting a colour is not enough — override them. */
+[data-mode="night"] .image-slot * {
+  color: var(--color-gold-bright);
+}
+
+/* Border and fill stay float-red — that is the alarm. Only the type moves, to
+   night-text at 16.77:1, because float-red as TEXT fails body on this ground. */
+[data-mode="night"] .todo-marker,
+[data-mode="night"] .todo-marker * {
+  color: var(--color-night-text);
 }
 
 /* ---------------------------------------------------------------------------

@@ -42,3 +42,8 @@ next-env.d.ts
 
 # generated verification artifacts
 /screenshots/
+
+# ...but the template must be committed — it documents every required var.
+!.env.example
+
+.vercel
