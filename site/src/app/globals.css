@@ -160,6 +160,48 @@ body {
 }
 
 /* ---------------------------------------------------------------------------
+   MOBILE NAV DRAWER
+
+   Slides in from the right, where the burger is — a panel that appears on the
+   opposite side of the control that opened it reads as a different element.
+
+   250ms sits inside the 150–300ms band MASTER.md §5 sets, and the reduced-
+   motion block below zeroes `animation-duration` globally, so this needs no
+   guard of its own.
+
+   The scrim fades its COLOUR, never the element's `opacity`: scripts/shoot.mjs
+   counts anything below opacity 0.99 as a possibly-unfired <Reveal>, and a
+   permanent scrim would sit in that check forever as false noise.
+--------------------------------------------------------------------------- */
+
+@keyframes drawer-slide-in {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes scrim-fade-in {
+  from {
+    background-color: color-mix(in srgb, var(--color-ink) 0%, transparent);
+  }
+  to {
+    background-color: color-mix(in srgb, var(--color-ink) 55%, transparent);
+  }
+}
+
+.drawer-panel {
+  animation: drawer-slide-in 250ms var(--ease-out-soft) both;
+}
+
+.drawer-scrim {
+  background-color: color-mix(in srgb, var(--color-ink) 55%, transparent);
+  animation: scrim-fade-in 250ms var(--ease-out-soft) both;
+}
+
+/* ---------------------------------------------------------------------------
    REDUCED MOTION
    Global backstop. Individual motion components ALSO check the media query in
    JS so they never even start an animation — this is belt and braces.

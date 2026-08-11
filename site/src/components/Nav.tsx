@@ -3,9 +3,11 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, Phone, X } from "lucide-react";
 import { ButtonLink } from "./Button";
+import { InstagramIcon } from "./icons/InstagramIcon";
 import { PalmMark } from "./Logo";
+import { business } from "@/content/business";
 import { bookingCta, navLinks } from "@/content/nav";
 
 /**
@@ -112,34 +114,73 @@ export function Nav() {
        * `pt-24` clears that bar so the first link is never hidden behind it.
        */}
       {open && (
-        <div
-          id="mobile-drawer"
-          className="fixed inset-0 z-40 overflow-y-auto bg-bg px-5 pt-24 pb-10 lg:hidden"
-        >
-          <nav aria-label="Glavna navigacija (mobilna)">
-            <ul className="flex flex-col gap-1">
-              {navLinks.map((l) => {
-                const active =
-                  l.href === "/"
-                    ? pathname === "/"
-                    : pathname.startsWith(l.href);
-                return (
-                  <li key={l.href}>
-                    <Link
-                      href={l.href}
-                      aria-current={active ? "page" : undefined}
-                      className={`block cursor-pointer border-b border-border py-4 font-display text-2xl transition-colors duration-200 hover:text-accent ${
-                        active ? "text-accent" : "text-text"
-                      }`}
-                    >
-                      {l.label}
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          </nav>
-        </div>
+        <>
+          {/* Scrim. Tapping it closes — the gesture people already expect from
+              a side panel, and it means the page behind stays visible so the
+              menu reads as a layer rather than a different screen. */}
+          <div
+            className="drawer-scrim fixed inset-0 z-30 lg:hidden"
+            onClick={() => setOpen(false)}
+            aria-hidden
+          />
+
+          <div
+            id="mobile-drawer"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Glavna navigacija"
+            /* `pt-20` clears the sticky bar; the tighter spacing is what makes
+               all nine rows fit on a 360×640 Android without scrolling. The
+               panel still scrolls if a link is ever added. */
+            className="drawer-panel fixed top-0 right-0 bottom-0 z-40 flex w-[82%] max-w-[340px] flex-col overflow-y-auto border-l border-border bg-bg px-6 pt-20 pb-6 lg:hidden"
+          >
+            <nav aria-label="Glavna navigacija (mobilna)">
+              <ul className="flex flex-col">
+                {navLinks.map((l) => {
+                  const active =
+                    l.href === "/"
+                      ? pathname === "/"
+                      : pathname.startsWith(l.href);
+                  return (
+                    <li key={l.href}>
+                      <Link
+                        href={l.href}
+                        aria-current={active ? "page" : undefined}
+                        className={`block cursor-pointer border-b border-border py-3.5 font-display text-2xl transition-colors duration-200 hover:text-accent ${
+                          active ? "text-accent" : "text-text"
+                        }`}
+                      >
+                        {l.label}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </nav>
+
+            {/* Pushed to the bottom of the panel. The phone is how this venue
+                has always taken bookings — all 31 captions say so — and on a
+                phone it is one tap. It belonged in here from the start. */}
+            <div className="mt-auto pt-8">
+              <a
+                href={`tel:${business.phone.href}`}
+                className="flex cursor-pointer items-center gap-3 text-lg transition-colors duration-200 hover:text-accent"
+              >
+                <Phone size={18} className="shrink-0 text-teak" aria-hidden />
+                <span className="tabular">{business.phone.display}</span>
+              </a>
+              <a
+                href={business.instagram.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-3 flex cursor-pointer items-center gap-3 text-lg transition-colors duration-200 hover:text-accent"
+              >
+                <InstagramIcon size={18} className="shrink-0 text-teak" />
+                {business.instagram.handle}
+              </a>
+            </div>
+          </div>
+        </>
       )}
     </>
   );

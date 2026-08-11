@@ -51,20 +51,31 @@ for (const [w, h, label] of SIZES) {
     const box = d.getBoundingClientRect();
     const links = [...d.querySelectorAll("a")];
 
+    /* A link counts as reachable if a finger can get to it — which includes
+       scrolling the panel, since the panel is legitimately scrollable. What
+       must NOT happen is a link that is on screen but painted over, which is
+       the bug this script exists for. So each link is scrolled into view
+       first, then asked whether it is the element at its own centre. */
     const reachable = links.filter((a) => {
+      a.scrollIntoView({ block: "center", behavior: "instant" });
       const r = a.getBoundingClientRect();
       if (r.width === 0 || r.height === 0) return false;
-      if (r.top < 0 || r.bottom > window.innerHeight) return false;
-      // The real question: is the link the thing the finger would hit?
+      if (r.bottom < 0 || r.top > window.innerHeight) return false;
       const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
       return Boolean(hit && hit.closest("#mobile-drawer"));
     });
+
+    const withoutScrolling = links.filter((a) => {
+      const r = a.getBoundingClientRect();
+      return r.height > 0 && r.top >= 0 && r.bottom <= window.innerHeight;
+    }).length;
 
     return {
       drawerHeight: Math.round(box.height),
       viewportHeight: window.innerHeight,
       total: links.length,
       reachable: reachable.length,
+      withoutScrolling,
       // The bug's signature: a drawer far shorter than the screen.
       collapsed: box.height < window.innerHeight * 0.5,
     };
@@ -85,7 +96,12 @@ for (const [w, h, label] of SIZES) {
   check(
     `${label} — svih ${m.total} linkova je dohvatljivo prstom`,
     m.reachable === m.total,
-    `${m.reachable}/${m.total} — ostali su van ekrana ili prekriveni`
+    `${m.reachable}/${m.total} — ostali su prekriveni ili nemaju veličinu`
+  );
+  // Not a failure — scrolling is legitimate — but worth seeing at a glance.
+  check(
+    `${label} — ${m.withoutScrolling}/${m.total} vidljivo bez skrolovanja`,
+    true
   );
 
   // Esc must close it: a drawer with no way out traps a visitor.
