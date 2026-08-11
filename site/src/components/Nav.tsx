@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Phone } from "lucide-react";
 import { ButtonLink } from "./Button";
 import { InstagramIcon } from "./icons/InstagramIcon";
@@ -15,22 +15,58 @@ import { bookingCta, navLinks } from "@/content/nav";
  * "Rezerviši" CTA stays visible in the bar itself — booking is the one action
  * that must never be a tap away (BUILD_PROMPT.md §9 Phase 2).
  */
+/** Must match the drawer animation duration in globals.css. */
+const DRAWER_MS = 250;
+
 export function Nav() {
+  /* `open` means "in the DOM". `closing` means "in the DOM but on its way
+     out". Both are needed because a drawer that unmounts the instant it is
+     dismissed has nothing left to animate — it just disappears, which is
+     exactly what it used to do. Keeping it mounted for one animation gives
+     the exit somewhere to happen. */
   const [open, setOpen] = useState(false);
+  const [closing, setClosing] = useState(false);
   /* Set the first time the button is pressed, and never unset. The closing
      animation is gated on it — otherwise it would play on first paint and the
      burger would assemble itself in front of someone who never touched it. */
   const [touched, setTouched] = useState(false);
   const pathname = usePathname();
 
-  // Close the drawer on navigation.
-  useEffect(() => setOpen(false), [pathname]);
+  /** True while the drawer is open AND not already leaving. Drives the burger
+      and `aria-expanded`, so the ✕ unfolds as the panel slides away rather
+      than waiting for it to finish. */
+  const shown = open && !closing;
+
+  const closeDrawer = useCallback(() => {
+    setClosing(true);
+  }, []);
+
+  /* Unmount once the slide-out has finished. `onAnimationEnd` does this in the
+     normal case; this timer is the backstop for when it never fires — a
+     background tab, or an interrupted animation. Without it the drawer could
+     sit closing forever and the page would stay scroll-locked. */
+  useEffect(() => {
+    if (!closing) return;
+    const t = setTimeout(() => {
+      setOpen(false);
+      setClosing(false);
+    }, DRAWER_MS + 120);
+    return () => clearTimeout(t);
+  }, [closing]);
+
+  /* Close on navigation. Cut, not animated: the page underneath is already
+     changing, so sliding a panel off a screen that is being replaced reads as
+     lag rather than polish. */
+  useEffect(() => {
+    setOpen(false);
+    setClosing(false);
+  }, [pathname]);
 
   // Lock scroll and allow Esc while the drawer is open.
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") closeDrawer();
     };
     document.addEventListener("keydown", onKey);
     const prev = document.body.style.overflow;
@@ -39,7 +75,7 @@ export function Nav() {
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = prev;
     };
-  }, [open]);
+  }, [open, closeDrawer]);
 
   return (
     <>
@@ -90,11 +126,15 @@ export function Nav() {
             type="button"
             onClick={() => {
               setTouched(true);
-              setOpen((v) => !v);
+              if (shown) closeDrawer();
+              else {
+                setClosing(false);
+                setOpen(true);
+              }
             }}
-            aria-expanded={open}
+            aria-expanded={shown}
             aria-controls="mobile-drawer"
-            aria-label={open ? "Zatvori meni" : "Otvori meni"}
+            aria-label={shown ? "Zatvori meni" : "Otvori meni"}
             className="cursor-pointer rounded-sm p-2 text-text transition-colors duration-200 hover:text-accent lg:hidden"
           >
             {/* Animated in CSS rather than swapped between two Lucide glyphs —
@@ -116,9 +156,9 @@ export function Nav() {
                * keyframes; the alternative was duplicating every keyframe
                * block under a second name purely to make the name differ.
                */
-              key={String(open)}
+              key={String(shown)}
               className="burger"
-              data-open={open}
+              data-open={shown}
               data-touched={touched}
               aria-hidden
             >
@@ -155,7 +195,8 @@ export function Nav() {
               menu reads as a layer rather than a different screen. */}
           <div
             className="drawer-scrim fixed inset-0 z-30 lg:hidden"
-            onClick={() => setOpen(false)}
+            data-closing={closing}
+            onClick={closeDrawer}
             aria-hidden
           />
 
@@ -164,6 +205,16 @@ export function Nav() {
             role="dialog"
             aria-modal="true"
             aria-label="Glavna navigacija"
+            data-closing={closing}
+            /* The panel is the last thing to finish moving, so it is what
+               decides the drawer is gone. The timer in the effect above is
+               only the backstop for when this never fires. */
+            onAnimationEnd={() => {
+              if (closing) {
+                setOpen(false);
+                setClosing(false);
+              }
+            }}
             /* `pt-20` clears the sticky bar; the tighter spacing is what makes
                all nine rows fit on a 360×640 Android without scrolling. The
                panel still scrolls if a link is ever added. */

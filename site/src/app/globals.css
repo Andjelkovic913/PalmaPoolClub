@@ -330,6 +330,28 @@ body {
   }
 }
 
+/* Separate OUT keyframes rather than the IN ones reversed. Same trap as the
+   burger: a browser restarts an animation only when the animation NAME
+   changes, so flipping `animation-direction` on the already-finished entry
+   animation would do nothing and the panel would still vanish instantly. */
+@keyframes drawer-slide-out {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes scrim-fade-out {
+  from {
+    background-color: color-mix(in srgb, var(--color-ink) 55%, transparent);
+  }
+  to {
+    background-color: color-mix(in srgb, var(--color-ink) 0%, transparent);
+  }
+}
+
 .drawer-panel {
   animation: drawer-slide-in 250ms var(--ease-out-soft) both;
 }
@@ -337,6 +359,20 @@ body {
 .drawer-scrim {
   background-color: color-mix(in srgb, var(--color-ink) 55%, transparent);
   animation: scrim-fade-in 250ms var(--ease-out-soft) both;
+}
+
+/* Closing. The panel stays mounted until the animation ends — see the
+   `closing` state in Nav.tsx, which is what gives the exit somewhere to
+   happen at all. `pointer-events: none` so a tap during the slide-out cannot
+   hit a link that is on its way off screen. */
+.drawer-panel[data-closing="true"] {
+  animation: drawer-slide-out 250ms var(--ease-out-soft) both;
+  pointer-events: none;
+}
+
+.drawer-scrim[data-closing="true"] {
+  animation: scrim-fade-out 250ms var(--ease-out-soft) both;
+  pointer-events: none;
 }
 
 /* ---------------------------------------------------------------------------

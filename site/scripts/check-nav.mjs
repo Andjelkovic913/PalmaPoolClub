@@ -141,6 +141,41 @@ for (const [w, h, label] of SIZES) {
     "animacija se ne restartuje — proveri `key` na .burger u Nav.tsx"
   );
 
+  /* The panel must animate OUT, not blink out of existence. It used to
+     unmount the instant it was dismissed, so the entrance was animated and
+     the exit was a cut. This watches the panel actually travel off screen and
+     only then leave the DOM. */
+  if ((await page.locator("#mobile-drawer").count()) === 0) await toggle.click();
+  await page.waitForTimeout(400);
+  await toggle.click();
+  await page.waitForTimeout(90);
+
+  const leaving = await page.evaluate(() => {
+    const d = document.getElementById("mobile-drawer");
+    if (!d) return null;
+    return {
+      closing: d.dataset.closing === "true",
+      running: d.getAnimations().some((a) => a.playState === "running"),
+      left: Math.round(d.getBoundingClientRect().left),
+    };
+  });
+
+  check(
+    `${label} — panel ostaje u DOM-u i animira izlaz`,
+    Boolean(leaving && leaving.closing && leaving.running),
+    leaving ? JSON.stringify(leaving) : "vec je nestao — izlazna animacija je preskocena"
+  );
+
+  await page.waitForTimeout(600);
+  check(
+    `${label} — i tek onda nestane`,
+    (await page.locator("#mobile-drawer").count()) === 0
+  );
+  check(
+    `${label} — skrol je otkljucan posle zatvaranja`,
+    (await page.evaluate(() => document.body.style.overflow)) !== "hidden"
+  );
+
   await ctx.close();
 }
 
