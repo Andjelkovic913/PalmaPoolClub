@@ -186,8 +186,16 @@ body {
    counts any element below opacity 0.99 as a possibly-unfired <Reveal>, and a
    permanently transparent bar would sit in that count as false noise forever.
 
-   250ms is inside the 150–300ms band; the reduced-motion block below zeroes
-   transition-duration globally, so the morph becomes an instant swap there. */
+   450ms — the ONE documented exception to the 150–300ms band, written up in
+   MASTER.md §5. Three phases inside 300ms gives each 100ms and the movement
+   reads as a flicker. The reduced-motion block below still zeroes it, so it
+   collapses to an instant swap there.
+
+   ⚠️ Opening and closing share these keyframes with the direction flipped, and
+   a browser only restarts an animation when the animation NAME changes. The
+   `key` on `.burger` in Nav.tsx forces a remount so each press starts a fresh
+   animation — without it the morph plays once per page load and every click
+   after that is dead. `scripts/check-nav.mjs` guards it. */
 
 .burger {
   position: relative;
@@ -280,13 +288,13 @@ body {
 }
 
 .burger[data-open="true"] span:nth-child(1) {
-  animation: burger-top 300ms var(--ease-out-soft) forwards;
+  animation: burger-top 450ms var(--ease-out-soft) forwards;
 }
 .burger[data-open="true"] span:nth-child(2) {
-  animation: burger-middle 300ms var(--ease-out-soft) forwards;
+  animation: burger-middle 450ms var(--ease-out-soft) forwards;
 }
 .burger[data-open="true"] span:nth-child(3) {
-  animation: burger-bottom 300ms var(--ease-out-soft) forwards;
+  animation: burger-bottom 450ms var(--ease-out-soft) forwards;
 }
 
 /* Closing replays the same keyframes backwards, so the ✕ unfolds the way it
@@ -295,13 +303,13 @@ body {
    paint and the burger would assemble itself in front of a visitor who never
    touched anything. */
 .burger[data-touched="true"][data-open="false"] span:nth-child(1) {
-  animation: burger-top 300ms var(--ease-out-soft) reverse forwards;
+  animation: burger-top 450ms var(--ease-out-soft) reverse forwards;
 }
 .burger[data-touched="true"][data-open="false"] span:nth-child(2) {
-  animation: burger-middle 300ms var(--ease-out-soft) reverse forwards;
+  animation: burger-middle 450ms var(--ease-out-soft) reverse forwards;
 }
 .burger[data-touched="true"][data-open="false"] span:nth-child(3) {
-  animation: burger-bottom 300ms var(--ease-out-soft) reverse forwards;
+  animation: burger-bottom 450ms var(--ease-out-soft) reverse forwards;
 }
 
 @keyframes drawer-slide-in {

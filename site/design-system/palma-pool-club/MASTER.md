@@ -359,6 +359,26 @@ Required: parallax on hero imagery, staggered scroll reveals, hover states that
 and in `Reveal.tsx` in JS, so a reduced-motion user never even starts an
 observer.
 
+### One documented exception: the burger → ✕ morph, 450ms
+
+`.burger` in `globals.css` runs at **450ms**, outside the band above. Owner-
+approved after reviewing it at 300ms and finding it too fast to read.
+
+The reason it needs longer than anything else on the site: it is not a state
+change, it is a **three-phase movement** — the bars shrink to dots and spread
+onto a diagonal, the dots rotate into that diagonal, then they grow out along
+it into the cross. Compressed into 300ms each phase gets 100ms and the whole
+thing reads as a flicker; the shape of the motion, which is the entire point,
+is lost.
+
+The 150–300ms band still governs **everything else**. This is the only
+exception, it applies to one 22px icon, and it is still a transform-only
+animation gated by the global reduced-motion rule — under
+`prefers-reduced-motion` it collapses to an instant swap.
+
+Do not read this as licence to slow other motion down. If a second exception
+is ever wanted, it gets written here too, with its own reason.
+
 ## 6. Dark mode — FORBIDDEN
 
 Night mode is a **per-page brand decision** (`data-mode="night"` on `/events`),

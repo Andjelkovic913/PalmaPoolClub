@@ -112,6 +112,35 @@ for (const [w, h, label] of SIZES) {
     (await page.locator("#mobile-drawer").count()) === 0
   );
 
+  /* The burger morph must run on EVERY press, not just the first.
+     Opening and closing share one set of keyframes with the direction
+     flipped, and a browser only restarts an animation when the animation
+     NAME changes — flipping `animation-direction` on a finished animation
+     does nothing. That shipped: the icon animated once per page load and
+     every click after it was dead until a refresh.
+     `getAnimations()` is the browser's own account of what is running, so
+     this cannot be satisfied by CSS that merely looks correct. */
+  /* Not `opener` — its aria-label flips to "Zatvori meni" once open, so a
+     locator bound to the label only matches every other press. */
+  const toggle = page.locator('button[aria-controls="mobile-drawer"]');
+  let everyPressAnimates = true;
+  for (let i = 0; i < 4; i++) {
+    await toggle.click();
+    await page.waitForTimeout(60);
+    const running = await page.evaluate(() =>
+      [...document.querySelectorAll(".burger span")]
+        .flatMap((el) => el.getAnimations())
+        .filter((a) => a.playState === "running").length
+    );
+    if (running < 3) everyPressAnimates = false;
+    await page.waitForTimeout(500);
+  }
+  check(
+    `${label} — burger se animira pri SVAKOM pritisku, ne samo prvom`,
+    everyPressAnimates,
+    "animacija se ne restartuje — proveri `key` na .burger u Nav.tsx"
+  );
+
   await ctx.close();
 }
 

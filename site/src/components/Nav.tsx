@@ -102,6 +102,21 @@ export function Nav() {
                 globals.css. The button keeps its aria-label, so what a screen
                 reader announces does not depend on the drawing. */}
             <span
+              /**
+               * `key` FORCES A REMOUNT ON EVERY TOGGLE, and it is load-bearing.
+               *
+               * Opening and closing run the same keyframes, one of them
+               * reversed. A browser only restarts a CSS animation when the
+               * animation-NAME changes — flipping `animation-direction` on an
+               * animation that has already finished does nothing at all. So
+               * the morph played once per page load and every click after that
+               * was dead until a refresh.
+               *
+               * Remounting three empty spans is cheap and keeps one set of
+               * keyframes; the alternative was duplicating every keyframe
+               * block under a second name purely to make the name differ.
+               */
+              key={String(open)}
               className="burger"
               data-open={open}
               data-touched={touched}
