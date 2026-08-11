@@ -174,6 +174,65 @@ body {
    permanent scrim would sit in that check forever as false noise.
 --------------------------------------------------------------------------- */
 
+/* Burger → ✕, as one continuous movement rather than an icon swap.
+   The three bars converge on the centre line, the middle one collapses, and
+   the outer two rotate through it into the cross.
+
+   Lucide cannot supply this — it ships two separate glyphs, and swapping them
+   is the jump-cut we are replacing. Same precedent as InstagramIcon.tsx: hand
+   -drawn only where the icon set genuinely cannot do the job.
+
+   The middle bar collapses with `scaleX(0)`, NOT `opacity`. scripts/shoot.mjs
+   counts any element below opacity 0.99 as a possibly-unfired <Reveal>, and a
+   permanently transparent bar would sit in that count as false noise forever.
+
+   250ms is inside the 150–300ms band; the reduced-motion block below zeroes
+   transition-duration globally, so the morph becomes an instant swap there. */
+
+.burger {
+  position: relative;
+  display: block;
+  width: 22px;
+  height: 16px;
+}
+
+.burger span {
+  position: absolute;
+  left: 0;
+  display: block;
+  width: 100%;
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;
+  transition:
+    transform 250ms var(--ease-out-soft),
+    top 250ms var(--ease-out-soft);
+}
+
+.burger span:nth-child(1) {
+  top: 0;
+}
+.burger span:nth-child(2) {
+  top: 7px;
+}
+.burger span:nth-child(3) {
+  top: 14px;
+}
+
+.burger[data-open="true"] span:nth-child(1),
+.burger[data-open="true"] span:nth-child(3) {
+  top: 7px;
+}
+.burger[data-open="true"] span:nth-child(1) {
+  transform: rotate(45deg);
+}
+.burger[data-open="true"] span:nth-child(3) {
+  transform: rotate(-45deg);
+}
+.burger[data-open="true"] span:nth-child(2) {
+  transform: scaleX(0);
+}
+
 @keyframes drawer-slide-in {
   from {
     transform: translateX(100%);

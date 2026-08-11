@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Menu, Phone, X } from "lucide-react";
+import { Phone } from "lucide-react";
 import { ButtonLink } from "./Button";
 import { InstagramIcon } from "./icons/InstagramIcon";
 import { PalmMark } from "./Logo";
@@ -90,7 +90,15 @@ export function Nav() {
             aria-label={open ? "Zatvori meni" : "Otvori meni"}
             className="cursor-pointer rounded-sm p-2 text-text transition-colors duration-200 hover:text-accent lg:hidden"
           >
-            {open ? <X size={22} aria-hidden /> : <Menu size={22} aria-hidden />}
+            {/* Animated in CSS rather than swapped between two Lucide glyphs —
+                the bars converge and rotate into the cross. See `.burger` in
+                globals.css. The button keeps its aria-label, so what a screen
+                reader announces does not depend on the drawing. */}
+            <span className="burger" data-open={open} aria-hidden>
+              <span />
+              <span />
+              <span />
+            </span>
           </button>
         </div>
       </div>
